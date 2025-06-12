@@ -4,10 +4,11 @@ from .serializers import AssistantSerializer, KnowledgeBaseEntrySerializer
 from .permissions import IsOwner
 from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
-from .semantic_search import find_best_match, find_top_matches
+from .semantic_search import find_best_match, find_top_matches, find_top_matches_from_entries
 from django.views import View
 from django.conf import settings
 from .gemini import ask_gemini, get_knowledge_context
+from rest_framework.views import APIView
 
 class AssistantListCreateView(generics.ListCreateAPIView):
     serializer_class = AssistantSerializer
@@ -54,40 +55,28 @@ class KnowledgeBaseEntryDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 
-class AnswerQueryView(View):
+class AnswerQueryView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
-        query = request.GET.get("q")
+        query = request.GET.get("query")
         assistant_id = request.GET.get('assistant_id')
 
         if not query:
             return JsonResponse({"error": "No question provided"}, status=400)
         
-        print(f"User is: {request.user}")
-        print(f"Is authenticated: {request.user.is_authenticated}")
-        
         if not assistant_id:
-            return JsonResponse({'message': 'Missing Assisant ID'})
-        
-        print(f"User is: {request.user}")
-        print(f"Is authenticated: {request.user.is_authenticated}")
+            return JsonResponse({'message': 'Missing Assistant ID'}, status=400)
         
         # Get assistant and verify it belongs to the requesting user
         try:
             assistant = Assistant.objects.get(id=assistant_id, user=request.user)
 
-            print(f"User is: {request.user}")
-            print(f"Is authenticated: {request.user.is_authenticated}")
-
         except Assistant.DoesNotExist:
             return JsonResponse({'message': 'Invalid or Unauthorized Assistant'}, status=403)
         
-        print(f"User is: {request.user}")
-        print(f"Is authenticated: {request.user.is_authenticated}")
-
 
         #find best match with the specified assistants knowledge
-        best_entry, score = find_best_match(query)
+        best_entry, score = find_best_match(assistant, query, threshold=0.6)
 
         # If confident match found (say confidence threshold 0.7)
         if best_entry and score >= 0.7:
@@ -97,18 +86,20 @@ class AnswerQueryView(View):
                 "confidence": round(score, 2)
             })
         
-        # Try Gemini with top 5 similar entries as context
-        top_matches = find_top_matches(query, top_k=5)
-
-        if top_matches:
-            context_parts = [f"{entry.title}\n{entry.content}" for entry, _ in top_matches]
-            context = "\n\n".join(context_parts)
+        # OPTIMIZED VERSION - Get all entries once
+        entries = KnowledgeBaseEntry.objects.filter(assistant=assistant, embedding__isnull=False)
+        
+        if entries:
+            # Use the same entries for both operations
+            top_matches = find_top_matches_from_entries(entries, query, top_k=5)
+            
+            if top_matches:
+                context_parts = [f"{entry.content}" for entry, _ in top_matches]
+                context = "\n\n".join(context_parts)
+            else:
+                context = "There is no relevant information available."
         else:
             context = "There is no relevant information available."
-
-        # If no confident match, try Gemini with a prompt built from query
-        context = get_knowledge_context()
-        #prompt = f"You are an assistant that answers questions based on provided knowledge base only. Answer precisely: {query}"
 
         gemini_answer = ask_gemini(query, context)
 
@@ -127,64 +118,3 @@ class AnswerQueryView(View):
             "confidence": 0
         })
     
-
-
-
-
-# class AnswerQueryView(View):
-#     def get(self, request, *args, **kwargs):
-#         query = request.GET.get("q")
-
-#         if not query:
-#             return JsonResponse({"error": "No question provided"}, status=400)
-
-#         best_entry, score = find_best_match(query)
-
-#         if best_entry and score >= 0.7:
-#             return JsonResponse({
-#                 "question": query,
-#                 "answer": best_entry.content,
-#                 "confidence": round(score, 2)
-#             })
-
-#         # Try Gemini if confidence is low
-#         gemini_answer = ask_gemini(query)
-#         if gemini_answer:
-#             return JsonResponse({
-#                 "question": query,
-#                 "answer": gemini_answer,
-#                 "confidence": round(score, 2)
-#             })
-
-#         return JsonResponse({
-#             "question": query,
-#             "answer": "I couldn't find a good match for that.",
-#             "confidence": round(score, 2)
-#         })
-
-
-
-
-
-# class AnswerQueryView(View):
-#     def get(self, request, *args, **kwargs):
-#         query = request.GET.get("q")
-
-#         if not query:
-#             return JsonResponse({"error": "No question provided"}, status=400)
-
-#         best_entry, score = find_best_match(query)
-
-#         if best_entry:
-#             return JsonResponse({
-#                 "question": query,
-#                 "answer": best_entry.content,
-#                 "confidence": round(score, 2)
-#             })
-
-#         return JsonResponse({
-#             "question": query,
-#             "answer": "I couldn't find a good match for that.",
-#             "confidence": round(score, 2)
-#         })
-

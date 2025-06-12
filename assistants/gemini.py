@@ -5,8 +5,14 @@ from .models import KnowledgeBaseEntry
 # Configure the Gemini SDK once when this module is imported
 genai.configure(api_key=settings.GEMINI_API_KEY)
 
-# Initialize the Gemini model object
-model = genai.GenerativeModel("gemini-2.0-flash")
+_model = None
+
+#Lazy loading for gemini 
+def get_gemini_model():
+    global _model
+    if _model is None:
+        _model = genai.GenerativeModel("gemini-2.0-flash")
+    return _model
 
 MAX_CONTEXT_LENGTH = 3000  # You can tweak this if needed
 
@@ -45,6 +51,7 @@ def ask_gemini(query: str, context: str) -> str:
     """.strip()
 
     try:
+        model = get_gemini_model()
         response = model.generate_content(prompt)
         # Extract the text content from the response object
         return response.text.strip()
