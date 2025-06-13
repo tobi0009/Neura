@@ -11,9 +11,6 @@ from .gemini import ask_gemini, get_knowledge_context
 from rest_framework.views import APIView
 
 class AssistantListCreateView(generics.ListCreateAPIView):
-    """
-    List all assistants for the authenticated user, or create a new one.
-    """
     serializer_class = AssistantSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -25,18 +22,12 @@ class AssistantListCreateView(generics.ListCreateAPIView):
 
 
 class AssistantDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """
-    Retrieve, update, or delete a specific assistant.
-    """
     serializer_class = AssistantSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
     queryset = Assistant.objects.all()
 
 
 class KnowledgeBaseEntryListCreateView(generics.ListCreateAPIView):
-    """
-    List or create knowledge base entries for a given assistant.
-    """
     serializer_class = KnowledgeBaseEntrySerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -51,9 +42,6 @@ class KnowledgeBaseEntryListCreateView(generics.ListCreateAPIView):
 
 
 class KnowledgeBaseEntryDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """
-    Retrieve, update, or delete a specific knowledge base entry.
-    """
     serializer_class = KnowledgeBaseEntrySerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
     queryset = KnowledgeBaseEntry.objects.all()
@@ -63,9 +51,6 @@ class KnowledgeBaseEntryDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class AnswerQueryView(APIView):
-    """
-    Answer a user's query using semantic search and Gemini fallback.
-    """
     permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         query = request.GET.get("query")

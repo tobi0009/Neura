@@ -1,13 +1,12 @@
 import torch
 from sentence_transformers import util
 from .models import KnowledgeBaseEntry
-from .utils import get_embedding  # the function we wrote earlier
+from .utils import get_embedding
 
 def find_best_match(assistant, query: str, threshold: float = 0.6):
     # Convert query to embedding
     query_embedding = get_embedding(query)
 
-    # Fetch all entries from DB
     entries = KnowledgeBaseEntry.objects.filter(assistant=assistant, embedding__isnull=False)
 
     if not entries:
@@ -22,7 +21,6 @@ def find_best_match(assistant, query: str, threshold: float = 0.6):
             best_score = score
             best_entry = entry
 
-    # Return only if above threshold
     if best_score >= threshold:
         return best_entry, best_score
 
