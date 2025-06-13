@@ -37,7 +37,7 @@ DEBUG = env('DEBUG')
 
 GEMINI_API_KEY = env("GEMINI_API_KEY")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "3efe-2a09-bac5-4dde-1c82-00-2d7-61.ngrok-free.app"]
 
 
 # Application definition
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'userauth',
     'assistants',
+    'whatsapp',
 ]
 
 MIDDLEWARE = [

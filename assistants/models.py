@@ -13,6 +13,7 @@ class Assistant(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assistants')
     name = models.CharField(max_length=100)
+    tag_name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
     platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES)
     group_id = models.CharField(max_length=100, blank=True, null=True)

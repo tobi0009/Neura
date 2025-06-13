@@ -16,8 +16,8 @@ class KnowledgeBaseEntryInline(admin.TabularInline):
 
 @admin.register(Assistant)
 class AssistantAdmin(admin.ModelAdmin):
-    list_display = ('name', 'user', 'platform', 'group_id', 'created_at', 'knowledge_entries_count', 'avatar_preview')
-    list_filter = ('platform', 'created_at', 'updated_at')
+    list_display = ('name', 'user', 'platform','tag_name','group_id', 'created_at', 'knowledge_entries_count', 'avatar_preview')
+    list_filter = ('platform', 'created_at', 'updated_at', 'tag_name')
     search_fields = ('name', 'description', 'user__email', 'user__first_name', 'user__last_name')
     readonly_fields = ('created_at', 'updated_at', 'avatar_preview')
     list_per_page = 20
@@ -25,7 +25,7 @@ class AssistantAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'description', 'user')
+            'fields': ('name', 'tag_name', 'description', 'user')
         }),
         ('Platform Configuration', {
             'fields': ('platform', 'group_id')
