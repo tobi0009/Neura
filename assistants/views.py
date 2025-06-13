@@ -11,6 +11,9 @@ from .gemini import ask_gemini, get_knowledge_context
 from rest_framework.views import APIView
 
 class AssistantListCreateView(generics.ListCreateAPIView):
+    """
+    List all assistants for the authenticated user, or create a new one.
+    """
     serializer_class = AssistantSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -22,14 +25,18 @@ class AssistantListCreateView(generics.ListCreateAPIView):
 
 
 class AssistantDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, or delete a specific assistant.
+    """
     serializer_class = AssistantSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
     queryset = Assistant.objects.all()
 
 
-
-
 class KnowledgeBaseEntryListCreateView(generics.ListCreateAPIView):
+    """
+    List or create knowledge base entries for a given assistant.
+    """
     serializer_class = KnowledgeBaseEntrySerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -44,18 +51,21 @@ class KnowledgeBaseEntryListCreateView(generics.ListCreateAPIView):
 
 
 class KnowledgeBaseEntryDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, or delete a specific knowledge base entry.
+    """
     serializer_class = KnowledgeBaseEntrySerializer
     permission_classes = [permissions.IsAuthenticated, IsOwner]
     queryset = KnowledgeBaseEntry.objects.all()
 
     def get_queryset(self):
         return KnowledgeBaseEntry.objects.filter(assistant__user=self.request.user)
-    
-
-
 
 
 class AnswerQueryView(APIView):
+    """
+    Answer a user's query using semantic search and Gemini fallback.
+    """
     permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         query = request.GET.get("query")
@@ -67,18 +77,13 @@ class AnswerQueryView(APIView):
         if not assistant_id:
             return JsonResponse({'message': 'Missing Assistant ID'}, status=400)
         
-        # Get assistant and verify it belongs to the requesting user
         try:
             assistant = Assistant.objects.get(id=assistant_id, user=request.user)
-
         except Assistant.DoesNotExist:
             return JsonResponse({'message': 'Invalid or Unauthorized Assistant'}, status=403)
         
-
-        #find best match with the specified assistants knowledge
         best_entry, score = find_best_match(assistant, query, threshold=0.6)
 
-        # If confident match found (say confidence threshold 0.7)
         if best_entry and score >= 0.7:
             return JsonResponse({
                 "question": query,
@@ -86,13 +91,10 @@ class AnswerQueryView(APIView):
                 "confidence": round(score, 2)
             })
         
-        # OPTIMIZED VERSION - Get all entries once
         entries = KnowledgeBaseEntry.objects.filter(assistant=assistant, embedding__isnull=False)
         
         if entries:
-            # Use the same entries for both operations
             top_matches = find_top_matches_from_entries(entries, query, top_k=5)
-            
             if top_matches:
                 context_parts = [f"{entry.content}" for entry, _ in top_matches]
                 context = "\n\n".join(context_parts)
@@ -104,17 +106,14 @@ class AnswerQueryView(APIView):
         gemini_answer = ask_gemini(query, context)
 
         if gemini_answer:
-            # You can add your own logic to rate confidence or trust Gemini answer
             return JsonResponse({
                 "question": query,
                 "answer": gemini_answer,
-                "confidence": 0.5  # a default confidence for Gemini answers
+                "confidence": 0.5
             })
 
-        # If Gemini also fails, send a default fallback message
         return JsonResponse({
             "question": query,
             "answer": "Sorry, I couldn't find an answer to that question.",
             "confidence": 0
         })
-    

@@ -1,3 +1,7 @@
+"""
+Integration and API tests for assistant views and knowledge base endpoints.
+"""
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -7,6 +11,9 @@ from assistants.models import Assistant, KnowledgeBaseEntry
 import json
 
 class AssistantViewsTest(TestCase):
+    """
+    Test suite for assistant CRUD API endpoints.
+    """
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -103,6 +110,9 @@ class AssistantViewsTest(TestCase):
         self.assertEqual(Assistant.objects.count(), 0)
 
 class KnowledgeBaseEntryViewsTest(TestCase):
+    """
+    Test suite for knowledge base entry API endpoints.
+    """
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -162,6 +172,9 @@ class KnowledgeBaseEntryViewsTest(TestCase):
         self.assertEqual(response.data['content'], "Test content")
 
 class AnswerQueryViewTest(TestCase):
+    """
+    Test suite for the answer query endpoint.
+    """
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(

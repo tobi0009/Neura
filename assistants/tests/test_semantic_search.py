@@ -6,7 +6,11 @@ from unittest.mock import patch, MagicMock
 import numpy as np
 
 class SemanticSearchTest(TestCase):
+    """
+    Tests for semantic search logic and embedding handling.
+    """
     def setUp(self):
+        # Set up user, assistant, and test entries for semantic search
         self.user = get_user_model().objects.create_user(
             email="test@example.com",
             first_name='testname',

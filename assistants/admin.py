@@ -7,6 +7,9 @@ from .models import Assistant, KnowledgeBaseEntry
 
 
 class KnowledgeBaseEntryInline(admin.TabularInline):
+    """
+    Inline admin for knowledge base entries within an assistant.
+    """
     model = KnowledgeBaseEntry
     extra = 1
     fields = ('id', 'content', 'created_at')
@@ -16,6 +19,9 @@ class KnowledgeBaseEntryInline(admin.TabularInline):
 
 @admin.register(Assistant)
 class AssistantAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing assistants.
+    """
     list_display = ('name', 'user', 'platform','tag_name','group_id', 'created_at', 'knowledge_entries_count', 'avatar_preview')
     list_filter = ('platform', 'created_at', 'updated_at', 'tag_name')
     search_fields = ('name', 'description', 'user__email', 'user__first_name', 'user__last_name')
@@ -43,12 +49,14 @@ class AssistantAdmin(admin.ModelAdmin):
     inlines = [KnowledgeBaseEntryInline]
     
     def knowledge_entries_count(self, obj):
+        # Show clickable count of knowledge entries for this assistant
         count = obj.knowledge_entries.count()
         url = reverse('admin:assistants_knowledgebaseentry_changelist') + f'?assistant__id__exact={obj.id}'
         return format_html('<a href="{}">{} entries</a>', url, count)
     knowledge_entries_count.short_description = 'Knowledge Entries'
     
     def avatar_preview(self, obj):
+        # Show a small preview of the assistant's avatar
         if obj.avatar:
             return format_html(
                 '<img src="{}" style="max-height: 50px; max-width: 50px; border-radius: 5px;" />',
@@ -58,11 +66,15 @@ class AssistantAdmin(admin.ModelAdmin):
     avatar_preview.short_description = 'Avatar Preview'
     
     def get_queryset(self, request):
+        # Optimize queryset for admin list display
         return super().get_queryset(request).select_related('user').prefetch_related('knowledge_entries')
 
 
 @admin.register(KnowledgeBaseEntry)
 class KnowledgeBaseEntryAdmin(admin.ModelAdmin):
+    """
+    Admin interface for managing knowledge base entries.
+    """
     list_display = ('assistant', 'content_preview', 'created_at', 'updated_at')
     list_filter = ('assistant__platform', 'created_at', 'updated_at', 'assistant')
     search_fields = ('content', 'assistant__name', 'assistant__user__email')
@@ -85,10 +97,12 @@ class KnowledgeBaseEntryAdmin(admin.ModelAdmin):
     )
     
     def content_preview(self, obj):
+        # Show a short preview of the content
         return obj.content[:100] + '...' if len(obj.content) > 100 else obj.content
     content_preview.short_description = 'Content Preview'
     
     def embedding_info(self, obj):
+        # Show embedding details in the admin
         if obj.embedding:
             return format_html(
                 '<div style="background: #f0f0f0; padding: 10px; border-radius: 5px;">'
@@ -103,6 +117,7 @@ class KnowledgeBaseEntryAdmin(admin.ModelAdmin):
     embedding_info.short_description = 'Embedding Information'
     
     def get_queryset(self, request):
+        # Optimize queryset for admin list display
         return super().get_queryset(request).select_related('assistant', 'assistant__user')
 
 
@@ -124,4 +139,4 @@ def generate_embeddings(modeladmin, request, queryset):
 
 # Add the actions to the admin classes
 AssistantAdmin.actions = [make_active]
-KnowledgeBaseEntryAdmin.actions = [generate_embeddings] 
+KnowledgeBaseEntryAdmin.actions = [generate_embeddings]

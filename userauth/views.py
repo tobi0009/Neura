@@ -12,10 +12,16 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 # Create your views here.
 class RegisterUserView(GenericAPIView):
+    """
+    API endpoint for registering a new user.
+    """
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]  # Allow anyone to register
 
     def post(self, request):
+        """
+        Register a new user and send OTP email.
+        """
         user_data = request.data
         serializer = self.serializer_class(data=user_data)
         if serializer.is_valid(raise_exception=True):
@@ -33,6 +39,9 @@ class RegisterUserView(GenericAPIView):
 
 
 class VerifyUserEmail(GenericAPIView):
+    """
+    API endpoint for verifying a user's email using OTP.
+    """
     def post(self, request):
         otpcode = request.data.get('otp')
         try:
@@ -55,6 +64,9 @@ class VerifyUserEmail(GenericAPIView):
 
 
 class LoginUserView(GenericAPIView):
+    """
+    API endpoint for user login.
+    """
     serializer_class=LoginSerializer
     def post(self, request):
         serializer = self.serializer_class(data=request.data, context={'request': request})
@@ -64,6 +76,9 @@ class LoginUserView(GenericAPIView):
     
 
 class PasswordResetRequestView(GenericAPIView):
+    """
+    API endpoint to request a password reset email.
+    """
     serializer_class = PasswordResetRequestSerializer
 
     def post(self, request):
@@ -74,6 +89,9 @@ class PasswordResetRequestView(GenericAPIView):
 
 
 class PasswordResetConfirm(GenericAPIView):
+    """
+    API endpoint to confirm password reset token and UID.
+    """
 
     def get(self, request, uidb64, token):
         try:
@@ -90,6 +108,9 @@ class PasswordResetConfirm(GenericAPIView):
 
 
 class SetNewPasswordView(GenericAPIView):
+    """
+    API endpoint to set a new password after reset.
+    """
     serializer_class = SetNewPasswordSerializer
 
     def patch(self, request):
@@ -100,6 +121,9 @@ class SetNewPasswordView(GenericAPIView):
 
 
 class LogoutApiView(GenericAPIView):
+    """
+    API endpoint to log out a user and blacklist their refresh token.
+    """
     serializer_class = LogoutUserSerializer
     permission_classes = [IsAuthenticated]
 

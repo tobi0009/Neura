@@ -1,8 +1,15 @@
+"""
+Unit tests for Assistant and KnowledgeBaseEntry models.
+"""
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from assistants.models import Assistant, KnowledgeBaseEntry
 
 class AssistantModelTest(TestCase):
+    """
+    Tests for the Assistant model.
+    """
     def setUp(self):
         # Create test data that will be used in multiple tests
         self.user = get_user_model().objects.create_user(
@@ -55,6 +62,9 @@ class AssistantModelTest(TestCase):
             )
 
 class KnowledgeBaseEntryModelTest(TestCase):
+    """
+    Tests for the KnowledgeBaseEntry model.
+    """
     def setUp(self):
         self.user = get_user_model().objects.create_user(
             email="test@example.com",

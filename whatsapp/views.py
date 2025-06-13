@@ -1,3 +1,8 @@
+"""
+Views for WhatsApp integration.
+Includes setup instructions and webhook for handling incoming WhatsApp messages.
+"""
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -11,11 +16,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 class WhatsAppSetupInstructions(APIView):
+    """
+    API endpoint to provide WhatsApp setup instructions for a specific assistant.
+    """
     permission_classes = [AllowAny]  # Temporarily allow any for testing
     
     def get(self, request, assistant_id):
         """
-        Get WhatsApp setup instructions for a specific assistant
+        Return WhatsApp setup instructions for the given assistant.
         """
         try:
             assistant = Assistant.objects.get(id=assistant_id)
@@ -50,9 +58,15 @@ class WhatsAppSetupInstructions(APIView):
             return Response({"error": "Assistant not found"}, status=404)
 
 class WhatsAppWebhook(APIView):
+    """
+    Webhook endpoint for receiving and responding to WhatsApp messages via Twilio.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        Handle incoming WhatsApp messages and respond using knowledge base or Gemini.
+        """
         try:
             # Twilio sends data as form-urlencoded, not JSON
             incoming_msg = request.data.get('Body', '')

@@ -1,3 +1,8 @@
+"""
+Tests for WhatsApp webhook and setup instructions endpoints.
+Covers message parsing, error handling, and Gemini fallback.
+"""
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -8,6 +13,9 @@ from unittest.mock import patch, MagicMock
 import json
 
 class WhatsAppWebhookTest(TestCase):
+    """
+    Test suite for WhatsApp webhook endpoint.
+    """
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -156,6 +164,9 @@ class WhatsAppWebhookTest(TestCase):
                 self.assertIn('Test response', response.content.decode())
 
 class WhatsAppSetupInstructionsTest(TestCase):
+    """
+    Test suite for WhatsApp setup instructions endpoint.
+    """
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
