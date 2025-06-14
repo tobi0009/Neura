@@ -5,17 +5,15 @@ from django.contrib.postgres.fields import ArrayField
 User = get_user_model()
 
 class Assistant(models.Model):
-    PLATFORM_CHOICES = [
-        ('whatsapp', 'WhatsApp'),
-        ('telegram', 'Telegram'),
-        ('discord', 'Discord'),
+    PLATFORM_CHOICE = [
+        ('whatsapp', 'WhatsApp')
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assistants')
     name = models.CharField(max_length=100)
     tag_name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
-    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES)
+    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICE, default='whatsapp')
     group_id = models.CharField(max_length=100, blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
