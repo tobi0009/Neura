@@ -37,7 +37,7 @@ DEBUG = env('DEBUG')
 
 GEMINI_API_KEY = env("GEMINI_API_KEY")
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "3efe-2a09-bac5-4dde-1c82-00-2d7-61.ngrok-free.app"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "f840-2a09-bac5-4dd3-14f0-00-216-49.ngrok-free.app"]
 
 
 # Application definition
@@ -61,7 +61,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',  # Commented out to disable CSRF
+    'django.middleware.csrf.CsrfViewMiddleware',  
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
