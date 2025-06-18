@@ -143,7 +143,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
         except User.DoesNotExist:
             raise AuthenticationFailed("User not found", 404)
         
-         # ⚠️ Only catch unexpected exceptions
+         #catch unexpected exceptions
         except (AuthenticationFailed, ValidationError) as e:
             print("EXCEPTION >>>", str(e))
             raise e  # Re-raise the real exception
